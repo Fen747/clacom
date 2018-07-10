@@ -1,0 +1,8 @@
+div.f {
+    display: flex;
+}
+
+.f.col, .fcol {
+    display: flex;
+    flex-direction: column;
+}
