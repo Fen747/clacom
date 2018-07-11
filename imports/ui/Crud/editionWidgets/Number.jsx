@@ -2,30 +2,27 @@ import React from 'react'
 
 import TextField from '@material-ui/core/TextField'
 
-class Text extends React.Component {
-    static defaultProps = {
-        multi: false
-    }
-
+class NumberWidget extends React.Component {
     handleChange = ({ target: { value } }) => {
         const { attribute, onChange } = this.props
 
-        onChange(attribute, value)
+        onChange(attribute, Number(value))
     }
 
     render() {
-        const { displayName, multi, value, disabled } = this.props
+        const { displayName, value, disabled, numberOptions } = this.props
 
         return (
             <TextField
-                multiline={multi}
+                type="number"
                 label={displayName}
-                value={value}
+                value={value.toString()}
                 disabled={disabled}
                 onChange={this.handleChange}
+                inputProps={numberOptions}
             />
         )
     }
 }
 
-export default Text
+export default NumberWidget

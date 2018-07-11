@@ -1,5 +1,8 @@
 import React from 'react'
 
+import Button from '@material-ui/core/Button'
+import Input from '@material-ui/core/Input'
+
 class Login extends React.Component{
 
     state={
@@ -35,11 +38,10 @@ class Login extends React.Component{
 
         return(
             <div>
-                <input value={email} placeholder="email" onChange={this.handleEmailCHange}/>
-                <input value={password} type='password' placeholder="password" onChange={this.handlePasswordCHange} />
-                <button onClick={this.handleSubmit}>Entrez</button>
-                <button onClick={this.handleSignup}>Sign Up</button>
-
+                <Input value={email} placeholder="email" onChange={this.handleEmailCHange}/>
+                <Input value={password} type='password' placeholder="password" onChange={this.handlePasswordCHange} />
+                <Button color="primary" onClick={this.handleSubmit}>Entrez</Button>
+                <Button color="secondary" onClick={this.handleSignup}>Sign Up</Button>
             </div>
         )
     }
