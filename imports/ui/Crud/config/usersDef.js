@@ -10,6 +10,23 @@ const usersDef = {
             displayName: 'Id'
         },
         {
+            name: 'firstname',
+            displayName: 'Firstname',
+            hide: true
+        },
+        {
+            name: 'lastname',
+            displayName: 'Lastname',
+            hide: true
+        },
+        {
+            name: 'username',
+            displayName: 'Username',
+            widget: 'username',
+            derivedData: true,
+            isSortable: false
+        },
+        {
             name: 'emails',
             displayName: 'Email',
             widget: 'email',

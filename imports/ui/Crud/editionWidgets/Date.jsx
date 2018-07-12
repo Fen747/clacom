@@ -17,6 +17,7 @@ class Date extends React.Component {
                 label={displayName}
                 value={moment(value).format('MM/DD/YYYYTHH:mm')}
                 disabled={disabled}
+                type="datetime-local"
                 onChange={this.handleChange}
             />
         )

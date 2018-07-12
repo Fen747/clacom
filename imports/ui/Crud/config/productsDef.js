@@ -81,17 +81,33 @@ const productsDef = {
             displayName: 'Created by user',
             widget: 'relationnal',
             notEditable: true,
+            type: 'select',
             lookup: {
                 distantColl: {
                     name: 'users',
                     instance: Users
                 },
                 field: 'username'
+            },
+            getOptions(_id) {
+                return new Promise((resolve, reject) => {
+                    Meteor.call(
+                        'users.getCreatorByDocId',
+                        { _id },
+                        (error, { _id: value, lastname, firstname }) => {
+                            if (error) return reject(error)
+
+                            resolve([
+                                { value, name: `${firstname} ${lastname}` }
+                            ])
+                        }
+                    )
+                })
             }
         }
     ],
     viewableBy: ['admin', 'designer'],
-    editableBy: ['--admin']
+    editableBy: ['admin']
 }
 
 export default productsDef

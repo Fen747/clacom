@@ -1,9 +1,14 @@
 import SimpleSchema from 'simpl-schema'
 
 export default new SimpleSchema({
-    username: {
+    lastname: {
         type: String,
-        label: 'Username',
+        label: 'Lastname',
+        max: 50
+    },
+    firstname: {
+        type: String,
+        label: 'Firstname',
         max: 50
     },
     createdAt: {

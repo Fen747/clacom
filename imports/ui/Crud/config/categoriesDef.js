@@ -31,10 +31,12 @@ const categoriesDef = {
                     Meteor.call(
                         'users.getCreatorByDocId',
                         { _id },
-                        (error, { _id: value, username: name }) => {
+                        (error, { _id: value, lastname, firstname }) => {
                             if (error) return reject(error)
 
-                            resolve([{ value, name }])
+                            resolve([
+                                { value, name: `${firstname} ${lastname}` }
+                            ])
                         }
                     )
                 })
@@ -45,7 +47,7 @@ const categoriesDef = {
                     name: 'users',
                     instance: Users
                 },
-                field: 'username'
+                field: 'username' // @TODO allow relational on derived data
             }
         }
     ],

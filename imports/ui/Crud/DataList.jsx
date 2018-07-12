@@ -59,7 +59,11 @@ class DataList extends React.Component {
                 {data.map(line => (
                     <TableRow key={line._id}>
                         {columns.map(column => {
-                            if (!showIds && column.name === '_id') return null
+                            if (
+                                column.hide ||
+                                (!showIds && column.name === '_id')
+                            )
+                                return null
 
                             const Widget = Widgets[column.widget || 'default']
                             // if no widget is defined in the column def, then use the default widget
