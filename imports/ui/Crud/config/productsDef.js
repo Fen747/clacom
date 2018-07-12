@@ -42,7 +42,7 @@ const productsDef = {
             displayName: 'TTC',
             widget: 'ttc',
             derivedData: true,
-            sortable: false
+            isSortable: false
         },
         {
             name: 'category',
@@ -91,7 +91,7 @@ const productsDef = {
         }
     ],
     viewableBy: ['admin', 'designer'],
-    editableBy: ['admin']
+    editableBy: ['--admin']
 }
 
 export default productsDef

@@ -14,19 +14,29 @@ import Table from '@material-ui/core/Table'
 import TableCell from '@material-ui/core/TableCell'
 import TableRow from '@material-ui/core/TableRow'
 import TablePagination from '@material-ui/core/TablePagination'
+import CircularProgress from '@material-ui/core/CircularProgress'
+import RefreshIcon from '@material-ui/icons/Refresh'
+import green from '@material-ui/core/colors/green'
+import Checkbox from '@material-ui/core/Checkbox'
+import FormControlLabel from '@material-ui/core/FormControlLabel'
+import TableSortLabel from '@material-ui/core/TableSortLabel'
 import { withStyles } from '@material-ui/core/styles'
 
 import { LIMIT_OPTIONS } from './enum'
 import { collections, getCollConfigByName } from './config'
 
 import DataList from './DataList'
-import CreateForm from './CreateForm'
+import EditionForm from './EditionForm'
 
 class Crud extends React.Component {
     static initialState = {
         page: 0,
         limit: LIMIT_OPTIONS[0],
-        data: []
+        data: [],
+        isFetching: false,
+        sortBy: '_id',
+        sortOrder: 1,
+        ongoingEdition: null
     }
 
     state = {
@@ -34,7 +44,8 @@ class Crud extends React.Component {
         loading: true,
         count: 0,
         collName: '',
-        showCreateModal: false
+        showEditModal: false,
+        showIds: false
     }
 
     handleLimitChange = ({ target: { value } }) => {
@@ -50,16 +61,22 @@ class Crud extends React.Component {
     }
 
     fetchData = () => {
-        const { page, limit, collName } = this.state
+        const { page, limit, collName, sortBy, sortOrder } = this.state
+
+        this.setState({ isFetching: true })
 
         Meteor.call(
             'crud.read',
-            { page, limit, collName },
+            { page, limit, collName, sort: { [sortBy]: sortOrder } },
             (error, { data, count } = {}) => {
+                const nextState = { isFetching: false, loading: false }
+
                 if (!error) {
-                    this.setState({ data, count, loading: false })
-                    console.log('DATA', data)
+                    nextState.data = data // @TODO add Toast
+                    nextState.count = count
                 } else console.error(error)
+
+                this.setState(nextState)
             }
         )
     }
@@ -72,7 +89,7 @@ class Crud extends React.Component {
 
     handleCreateNewItem = () => {
         this.setState({
-            showCreateModal: true
+            showEditModal: true
         })
     }
 
@@ -80,8 +97,36 @@ class Crud extends React.Component {
         if (refresh) this.fetchData()
 
         this.setState({
-            showCreateModal: false
+            showEditModal: false,
+            ongoingEdition: null
         })
+    }
+
+    handleToggleIds = ({ target: { checked: showIds } }) => {
+        this.setState({ showIds })
+    }
+
+    handleSort = sortByNew => event => {
+        const { sortBy, sortOrder } = this.state
+        const nextState = {}
+
+        if (sortByNew === sortBy) {
+            nextState.sortOrder = sortOrder * -1
+        } else {
+            nextState.sortBy = sortByNew
+        }
+
+        this.setState(nextState, () => {
+            this.fetchData()
+        })
+    }
+
+    handleEditDocument = documentId => {
+        // @TIPS Document
+        const { data } = this.state
+        const ongoingEdition = data.find(({ _id }) => documentId === _id)
+
+        this.setState({ ongoingEdition, showEditModal: true })
     }
 
     render() {
@@ -92,7 +137,12 @@ class Crud extends React.Component {
             loading,
             count,
             collName,
-            showCreateModal
+            showEditModal,
+            isFetching,
+            showIds,
+            sortOrder,
+            sortBy,
+            ongoingEdition
         } = this.state
         const { userId, classes } = this.props
         const viewableColls = collections.filter(({ viewableBy }) =>
@@ -135,6 +185,15 @@ class Crud extends React.Component {
                                     )}
                                 </Select>
                             </FormControl>
+                            <FormControlLabel
+                                control={
+                                    <Checkbox
+                                        checked={showIds}
+                                        onChange={this.handleToggleIds}
+                                    />
+                                }
+                                label="Toggle ids"
+                            />
                             <Button
                                 onClick={this.handleCreateNewItem}
                                 disabled={!collName || !isEditable}
@@ -142,17 +201,73 @@ class Crud extends React.Component {
                             >
                                 New
                             </Button>
+                            <div className={classes.fetchingWrapper}>
+                                <Button
+                                    onClick={this.fetchData}
+                                    disabled={!collName || isFetching}
+                                    variant="fab"
+                                >
+                                    <RefreshIcon />
+                                </Button>
+                                {isFetching && (
+                                    <CircularProgress
+                                        size={68}
+                                        className={classes.fabProgress}
+                                    />
+                                )}
+                            </div>
                         </ToolBar>
                         {!!collName && (
                             <Table>
                                 <TableHead>
                                     <TableRow>
                                         {currentCollection.columns.map(
-                                            ({ displayName }, idx) => (
-                                                <TableCell key={idx}>
-                                                    {displayName}
-                                                </TableCell>
-                                            )
+                                            (
+                                                {
+                                                    displayName,
+                                                    name,
+                                                    isSortable = true
+                                                },
+                                                idx
+                                            ) =>
+                                                (name !== '_id' || showIds) && (
+                                                    <TableCell key={idx}>
+                                                        <TableSortLabel
+                                                            active={isSortable}
+                                                            direction={
+                                                                sortOrder < 0
+                                                                    ? 'desc'
+                                                                    : 'asc'
+                                                            }
+                                                            onClick={this.handleSort(
+                                                                name
+                                                            )}
+                                                        >
+                                                            <Typography
+                                                                color={
+                                                                    sortBy ===
+                                                                    name
+                                                                        ? 'primary'
+                                                                        : 'default'
+                                                                }
+                                                                style={
+                                                                    sortBy ===
+                                                                    name
+                                                                        ? {
+                                                                              fontWeight:
+                                                                                  'bold'
+                                                                          }
+                                                                        : {}
+                                                                }
+                                                            >
+                                                                {displayName}
+                                                            </Typography>
+                                                        </TableSortLabel>
+                                                    </TableCell>
+                                                )
+                                        )}
+                                        {isEditable && (
+                                            <TableCell>Actions</TableCell>
                                         )}
                                     </TableRow>
                                 </TableHead>
@@ -161,6 +276,9 @@ class Crud extends React.Component {
                                     loading={loading}
                                     currentCollection={currentCollection}
                                     refresh={this.fetchData}
+                                    showIds={showIds}
+                                    isEditable={isEditable}
+                                    onEditDocument={this.handleEditDocument}
                                 />
                             </Table>
                         )}
@@ -189,8 +307,9 @@ class Crud extends React.Component {
                     </Paper>
                 </React.Fragment>
                 {isEditable && (
-                    <CreateForm
-                        show={showCreateModal}
+                    <EditionForm
+                        ongoingEdition={ongoingEdition}
+                        show={showEditModal}
                         onClose={this.handleModalClose}
                         currentCollection={currentCollection}
                     />
@@ -218,6 +337,17 @@ export default withTracker(props => {
             '& .coll-selector': {
                 width: '200px'
             }
+        },
+        fetchingWrapper: {
+            margin: theme.spacing.unit,
+            position: 'relative'
+        },
+        fabProgress: {
+            color: green[500],
+            position: 'absolute',
+            top: -6,
+            left: -6,
+            zIndex: 1
         }
     }))(Crud)
 )

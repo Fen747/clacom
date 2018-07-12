@@ -8,6 +8,8 @@ import TableCell from '@material-ui/core/TableCell'
 import TableRow from '@material-ui/core/TableRow'
 import Button from '@material-ui/core/Button'
 import DeleteIcon from '@material-ui/icons/DeleteForever'
+import EditIcon from '@material-ui/icons/Edit'
+import { withStyles } from '@material-ui/core/styles'
 
 class DataList extends React.Component {
     handleRemove = ({
@@ -30,11 +32,22 @@ class DataList extends React.Component {
         )
     }
 
+    handleEdit = ({
+        currentTarget: {
+            dataset: { docid: documentId }
+        }
+    }) => {
+        this.props.onEditDocument(documentId)
+    }
+
     render() {
         const {
             data,
             loading,
-            currentCollection: { columns, name }
+            currentCollection: { columns, name },
+            showIds,
+            isEditable,
+            classes
         } = this.props
 
         if (loading) {
@@ -46,6 +59,8 @@ class DataList extends React.Component {
                 {data.map(line => (
                     <TableRow key={line._id}>
                         {columns.map(column => {
+                            if (!showIds && column.name === '_id') return null
+
                             const Widget = Widgets[column.widget || 'default']
                             // if no widget is defined in the column def, then use the default widget
 
@@ -59,18 +74,28 @@ class DataList extends React.Component {
                                 </TableCell>
                             )
                         })}
-
-                        <TableCell>
-                            <Button
-                                size="small"
-                                color="secondary"
-                                variant="raised"
-                                onClick={this.handleRemove}
-                                data-docid={line._id}
-                            >
-                                <DeleteIcon />
-                            </Button>
-                        </TableCell>
+                        {isEditable && (
+                            <TableCell>
+                                <Button
+                                    size="small"
+                                    color="secondary"
+                                    onClick={this.handleRemove}
+                                    data-docid={line._id}
+                                    className={classes.actionBtn}
+                                >
+                                    <DeleteIcon />
+                                </Button>
+                                <Button
+                                    size="small"
+                                    color="primary"
+                                    onClick={this.handleEdit}
+                                    data-docid={line._id}
+                                    className={classes.actionBtn}
+                                >
+                                    <EditIcon />
+                                </Button>
+                            </TableCell>
+                        )}
                     </TableRow>
                 ))}
             </TableBody>
@@ -78,8 +103,12 @@ class DataList extends React.Component {
     }
 }
 
-export default withTracker(
-    ({ limit, currentCollection: { columns }, data }) => {
+export default withStyles(theme => ({
+    actionBtn: {
+        minWidth: '38px'
+    }
+}))(
+    withTracker(({ limit, currentCollection: { columns }, data }) => {
         const relationnalData = columns.filter(
             ({ widget }) => widget === 'relationnal'
         )
@@ -111,5 +140,5 @@ export default withTracker(
         }
 
         return {}
-    }
-)(DataList)
+    })(DataList)
+)

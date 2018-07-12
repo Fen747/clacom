@@ -7,7 +7,7 @@ import FormControl from '@material-ui/core/FormControl'
 import Chip from '@material-ui/core/Chip'
 import { withStyles } from '@material-ui/core/styles'
 
-class SelectInput extends React.Component {
+class SelectWidget extends React.Component {
     state = {
         options: []
     }
@@ -27,13 +27,22 @@ class SelectInput extends React.Component {
 
     async fetchOptions() {
         try {
-            const options = await this.props.getOptions()
+            const options = await this.props.getOptions(this.props.value)
 
             if (options.length) {
-                const { attribute, onChange, multi } = this.props
+                const {
+                    attribute,
+                    onChange,
+                    multi,
+                    ongoingEdition,
+                    value
+                } = this.props
+                const defaultValue = ongoingEdition ? value : multi ? [] : ''
 
-                onChange(attribute, multi ? [] : '')
+                onChange(attribute, defaultValue)
             }
+
+            //console.log(options)
 
             this.setState({ options })
         } catch (e) {
@@ -56,12 +65,20 @@ class SelectInput extends React.Component {
         onChange(attribute, value)
     }
 
-    _getOptionNameFromValue = selected =>
-        this.state.options.find(({ name, value }) => value === selected).name
+    _getOptionNameFromValue = selected => {
+        console.log('selected', selected)
+        console.log('options', this.state.options)
+
+        const { name } = this.state.options.find(opt => {
+            console.log('opt', opt)
+            return opt.value === selected
+        }) || { name: '' }
+
+        return name
+    }
 
     selectInputRenderFc = selected => {
         const { multi, classes } = this.props
-        const { options } = this.state
 
         return multi ? (
             <div className={classes.chips}>
@@ -91,8 +108,8 @@ class SelectInput extends React.Component {
                     multiple={multi}
                     value={value}
                     onChange={this.handleChange}
-                    disabled={disabled}
                     renderValue={this.selectInputRenderFc}
+                    disabled={disabled}
                 >
                     {options.map(({ value, name }, idx) => (
                         <MenuItem key={idx} value={value}>
@@ -113,4 +130,4 @@ export default withStyles(theme => ({
     chip: {
         margin: theme.spacing.unit / 4
     }
-}))(SelectInput)
+}))(SelectWidget)

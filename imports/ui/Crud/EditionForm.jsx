@@ -1,5 +1,6 @@
 import React from 'react'
 import { toast } from 'react-toastify'
+import moment from 'moment'
 
 import Dialog from '@material-ui/core/Dialog'
 import DialogActions from '@material-ui/core/DialogActions'
@@ -9,46 +10,53 @@ import Button from '@material-ui/core/Button'
 
 import EditionWidgets from './editionWidgets'
 
-class CreateForm extends React.Component {
+class EditionForm extends React.Component {
     state = {
         document: {}
     }
 
-    componentWillReceiveProps({ show, currentCollection: { columns } }) {
+    componentWillReceiveProps({
+        show,
+        ongoingEdition: editing,
+        currentCollection: { columns }
+    }) {
         if (this.props.show === false && show === true) {
             const document = {}
 
-            console.log(columns)
-
             columns.forEach(
                 ({ type, name, derivedData = false, notEditable }) => {
-                    if (name === '_id' || derivedData || notEditable) return
-
-                    console.log('NOT EDITABLE ? ', notEditable)
+                    if (
+                        name === '_id' ||
+                        derivedData ||
+                        (notEditable && !editing)
+                    )
+                        return
 
                     switch (type) {
                         case 'date': {
-                            document[name] = new Date()
+                            document[name] = editing
+                                ? editing[name]
+                                : new Date()
                             break
                         }
                         case 'email': {
-                            document[name] = ''
+                            document[name] = editing ? editing[name] : ''
                             break
                         }
                         case 'select': {
-                            document[name] = ''
+                            document[name] = editing ? editing[name] : ''
                             break
                         }
                         case 'url': {
-                            document[name] = ''
+                            document[name] = editing ? editing[name] : ''
                             break
                         }
                         case 'number': {
-                            document[name] = 0
+                            document[name] = editing ? editing[name] : 0
                             break
                         }
                         default: {
-                            document[name] = ''
+                            document[name] = editing ? editing[name] : ''
                             break
                         }
                     }
@@ -81,6 +89,25 @@ class CreateForm extends React.Component {
         })
     }
 
+    handleEdit = () => {
+        const { document } = this.state
+        const {
+            onClose,
+            currentCollection: { name: collName },
+            ongoingEdition: { _id }
+        } = this.props
+
+        Meteor.call('crud.edit', { document, collName, _id }, (e, result) => {
+            if (e) {
+                console.error(e)
+                toast.error(e.details)
+            } else {
+                toast.success('Item successfuly updated')
+                onClose(true)
+            }
+        })
+    }
+
     handleChange = (attr, value) => {
         const { document } = this.state
 
@@ -98,13 +125,19 @@ class CreateForm extends React.Component {
     render() {
         const {
             currentCollection: { name, columns },
-            show
+            show,
+            ongoingEdition
         } = this.props
         const { document } = this.state
+        const action = ongoingEdition ? 'Edit' : 'Create'
+
+        console.log(this.props)
 
         return (
             <Dialog open={show}>
-                <DialogTitle>Create a new item in {name}</DialogTitle>
+                <DialogTitle>
+                    {action} a new item in {name}
+                </DialogTitle>
                 <DialogContent>
                     {columns.map(
                         ({
@@ -126,6 +159,7 @@ class CreateForm extends React.Component {
                                         {...columnConfig}
                                         disabled={notEditable}
                                         value={document[name]}
+                                        ongoingEdition={ongoingEdition}
                                     />
                                 </div>
                             )
@@ -137,9 +171,11 @@ class CreateForm extends React.Component {
                     <Button
                         variant="raised"
                         color="primary"
-                        onClick={this.handleCreate}
+                        onClick={
+                            ongoingEdition ? this.handleEdit : this.handleCreate
+                        }
                     >
-                        Create
+                        {action}
                     </Button>
                 </DialogActions>
             </Dialog>
@@ -147,4 +183,4 @@ class CreateForm extends React.Component {
     }
 }
 
-export default CreateForm
+export default EditionForm

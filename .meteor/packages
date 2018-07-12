@@ -22,3 +22,5 @@ react-meteor-data
 dburles:mongo-collection-instances
 alanning:roles
 aldeed:collection2
+
+meteorhacks:unblock
