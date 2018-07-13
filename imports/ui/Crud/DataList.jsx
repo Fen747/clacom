@@ -1,8 +1,6 @@
 import React from 'react'
 import { withTracker } from 'meteor/react-meteor-data'
 
-import Placeholder from '/imports/ui/Components/Placeholder'
-import Widgets from './widgets'
 import TableBody from '@material-ui/core/TableBody'
 import TableCell from '@material-ui/core/TableCell'
 import TableRow from '@material-ui/core/TableRow'
@@ -10,6 +8,9 @@ import Button from '@material-ui/core/Button'
 import DeleteIcon from '@material-ui/icons/DeleteForever'
 import EditIcon from '@material-ui/icons/Edit'
 import { withStyles } from '@material-ui/core/styles'
+
+import Placeholder from '/imports/ui/Components/Placeholder'
+import Widgets from './widgets'
 
 class DataList extends React.Component {
     handleRemove = ({

@@ -1,3 +1,5 @@
 import './crud'
 import './categories'
 import './users'
+import './products'
+//import './mediaManager'

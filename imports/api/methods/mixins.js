@@ -23,7 +23,7 @@ export const unblock = function() {
     this.unblock()
 }
 
-export const checkCanReadCollection = function({ collName }) {
+export const checkCRUDCanReadCollection = function({ collName }) {
     const { viewableBy } = getCollConfigByName(collName)
 
     if (!Roles.userIsInRole(Meteor.userId(), viewableBy)) {
@@ -34,10 +34,19 @@ export const checkCanReadCollection = function({ collName }) {
     }
 }
 
-export const checkCanEditCollection = function({ collName }) {
+export const checkCRUDCanEditCollection = function({ collName }) {
     const { editableBy } = getCollConfigByName(collName)
 
     if (!Roles.userIsInRole(Meteor.userId(), editableBy)) {
+        throw new Meteor.Error(
+            '[401] Unauthorized',
+            'You are not authorized to perform this action'
+        )
+    }
+}
+
+export const checkIsChoucroute = function() {
+    if (!Roles.userIsInRole(Meteor.userId(), 'admin')) {
         throw new Meteor.Error(
             '[401] Unauthorized',
             'You are not authorized to perform this action'

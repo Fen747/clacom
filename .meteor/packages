@@ -24,3 +24,5 @@ alanning:roles
 aldeed:collection2
 
 meteorhacks:unblock
+dynamic-import
+server-render

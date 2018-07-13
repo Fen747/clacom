@@ -1,39 +1,31 @@
 import React from 'react'
 
+import CircularProgress from '@material-ui/core/CircularProgress'
+
 class Placeholder extends React.Component {
     state = {
-        display: false
+        display: Meteor.isServer
     }
 
-    componentDidMount(){
-        this.timeout = setTimeout(()=>{
+    componentDidMount() {
+        this.timeout = setTimeout(() => {
             this.setState({
                 display: true
             })
         }, this.props.timeout)
     }
 
-    componentWillUnmount(){
+    componentWillUnmount() {
         clearTimeout(this.timeout)
     }
 
+    render() {
+        const { display } = this.state
 
-    render(){
-        const {display} = this.state
-
-        return(
-
-            display ?
-            <div>
-                Loading
-            </div>
-            :
-            null
-        )
+        return display ? <CircularProgress /> : null
     }
-
 }
 
-Placeholder.defaultProps = {timeout: 500}
+Placeholder.defaultProps = { timeout: 500 }
 
 export default Placeholder

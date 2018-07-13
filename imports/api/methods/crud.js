@@ -1,14 +1,14 @@
 import { getCollConfigByName } from '/imports/ui/Crud/config'
 import {
     mix,
-    checkCanReadCollection,
-    checkCanEditCollection,
+    checkCRUDCanReadCollection,
+    checkCRUDCanEditCollection,
     unblock,
     checkLoggedIn
 } from './mixins'
 
 const methodsRequiringEditPerm = mix(
-    [checkLoggedIn, checkCanEditCollection, unblock],
+    [checkLoggedIn, checkCRUDCanEditCollection, unblock],
     {
         'crud.create'({ document, collName }) {
             const coll = Mongo.Collection.get(collName)
@@ -42,7 +42,7 @@ const methodsRequiringEditPerm = mix(
 )
 
 const methodsRequiringReadPerm = mix(
-    [checkLoggedIn, checkCanReadCollection, unblock],
+    [checkLoggedIn, checkCRUDCanReadCollection, unblock],
     {
         'crud.read'({ page = 0, limit = 10, collName, sort = { _id: 1 } }) {
             const skip = page * limit

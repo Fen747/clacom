@@ -2,7 +2,14 @@ div.f {
     display: flex;
 }
 
-.f.col, .fcol {
+.f.col,
+.fcol {
     display: flex;
     flex-direction: column;
+}
+
+body,
+html {
+    padding: 0;
+    margin: 0;
 }

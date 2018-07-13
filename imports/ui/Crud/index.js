@@ -27,6 +27,7 @@ import { collections, getCollConfigByName } from './config'
 
 import DataList from './DataList'
 import EditionForm from './EditionForm'
+import { AppContext, withContext } from '/imports/ui/AppContext'
 
 class Crud extends React.Component {
     static initialState = {
@@ -144,7 +145,10 @@ class Crud extends React.Component {
             sortBy,
             ongoingEdition
         } = this.state
-        const { userId, classes } = this.props
+        const {
+            context: { userId },
+            classes
+        } = this.props
         const viewableColls = collections.filter(({ viewableBy }) =>
             Roles.userIsInRole(userId, viewableBy)
         )
@@ -319,15 +323,7 @@ class Crud extends React.Component {
     }
 }
 
-export default withTracker(props => {
-    /* @TIPS pour éviter de lire "roles" of undefined
-    const user = Meteor.user() || {}
-    const { roles = [] } = user
-    */
-    const userId = Meteor.userId()
-
-    return { userId }
-})(
+export default withContext(AppContext)(
     withStyles(theme => ({
         toolbar: {
             display: 'flex',
